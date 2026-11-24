@@ -1,5 +1,13 @@
 // Número da Fran (somente dígitos com DDI, ex.: 5545999999999). Vazio = o WhatsApp pede para escolher o contato.
 var WA_NUMBER = "";
+// Coloque as fotos na pasta /img com estes nomes (ou ajuste os caminhos). Sem o arquivo, o placeholder continua aparecendo.
+var IMG = {
+    hero: "img/fran-hero.jpg",
+    fran: "img/fran.jpg",
+    work: ["img/trabalho-1.jpg", "img/trabalho-2.jpg", "img/trabalho-3.jpg", "img/trabalho-4.jpg", "img/trabalho-5.jpg"],
+    before: "img/antes.jpg",
+    after: "img/depois.jpg"
+};
 var SERVICES = [
     ["Extensão de cílios", "Fios aplicados um a um para alongar e valorizar seu olhar com leveza.", "A partir de R$ 140"],
     ["Manutenção", "Reposição cuidadosa dos fios para manter o efeito bonito e uniforme.", "A partir de R$ 90"],
@@ -14,57 +22,70 @@ document.getElementById("svc").innerHTML = SERVICES.map(function (s) {
 }).join("");
 document.querySelectorAll(".wa").forEach(function (a) { a.href = wa(a.dataset.msg || "Olá, Fran!") });
 
-// Cílios gerados ao longo da pálpebra (quadrática 30,170 → 300,20 → 570,170)
-var g = document.getElementById("lashes"), NS = "http://www.w3.org/2000/svg", N = 34;
-function q(t) { var u = 1 - t; return [u * u * 30 + 2 * u * t * 300 + t * t * 570, u * u * 170 + 2 * u * t * 20 + t * t * 170] }
-for (var i = 0; i < N; i++) {
-    var t = .05 + .9 * i / (N - 1), p = q(t), p2 = q(Math.min(t + .01, 1)), dx = p2[0] - p[0], dy = p2[1] - p[1], l = Math.hypot(dx, dy), nx = dy / l, ny = -dx / l;
-    var len = (14 + 30 * Math.sin(Math.PI * t) ** .8) * (.85 + .3 * ((i * 37) % 7) / 7), bend = (t - .5) * 26;
-    var x2 = p[0] + nx * len + bend, y2 = p[1] + ny * len, cx = p[0] + nx * len * .5 + bend * .2, cy = p[1] + ny * len * .5;
-    var el = document.createElementNS(NS, "path"); el.setAttribute("class", "lash");
-    el.setAttribute("d", "M" + p[0].toFixed(1) + " " + p[1].toFixed(1) + " Q" + cx.toFixed(1) + " " + cy.toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1)); g.appendChild(el);
-}
+(function () {
+    var $ = function (id) { return document.getElementById(id) },
+        fine = matchMedia("(pointer:fine)").matches,
+        reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-if (window.gsap && window.ScrollTrigger && !reduce) {
-    gsap.registerPlugin(ScrollTrigger);
-    if (window.Lenis) {
-        var lenis = new Lenis({ lerp: .1 });
-        lenis.on("scroll", ScrollTrigger.update);
-        gsap.ticker.add(function (t) { lenis.raf(t * 1000) }); gsap.ticker.lagSmoothing(0);
-        document.querySelectorAll('a[href^="#"]').forEach(function (a) { a.addEventListener("click", function (e) { var id = a.getAttribute("href"); if (id.length > 1 && document.querySelector(id)) { e.preventDefault(); lenis.scrollTo(id, { offset: -64 }) } }) });
+    // Imagens com carregamento preguiçoso; só substituem o placeholder se o arquivo existir
+    var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+            if (!e.isIntersecting) return; io.unobserve(e.target);
+            var b = e.target, d = b._d, im = new Image(); im.alt = d[1]; im.decoding = "async";
+            im.onload = function () { b.appendChild(im); b.classList.add("has") }; im.src = d[0];
+        });
+    }, { rootMargin: "300px" });
+    function put(box, src, alt) { if (box && src) { box._d = [src, alt]; io.observe(box) } }
+    put($("hph"), IMG.hero, "Fran, especialista em cílios e sobrancelhas");
+    put($("par"), IMG.fran, "Fran atendendo uma cliente");
+    document.querySelectorAll(".rail figure").forEach(function (f, i) { put(f, IMG.work[i], "Trabalho de cílios " + (i + 1)) });
+    put($("cb"), IMG.before, "Olhar antes do procedimento");
+    put($("ca"), IMG.after, "Olhar depois do procedimento");
+
+    // Brilho dourado que segue o mouse nos cards
+    if (fine) document.querySelectorAll(".card").forEach(function (c) {
+        c.addEventListener("pointermove", function (e) { var r = c.getBoundingClientRect(); c.style.setProperty("--mx", (e.clientX - r.left) + "px"); c.style.setProperty("--my", (e.clientY - r.top) + "px") });
+    });
+
+    // Foto do hero inclina levemente com o mouse
+    var hp = $("hph");
+    if (fine && !reduce) {
+        hp.addEventListener("pointermove", function (e) { var r = hp.getBoundingClientRect(); hp.style.transform = "perspective(900px) rotateY(" + (((e.clientX - r.left) / r.width - .5) * 8).toFixed(2) + "deg) rotateX(" + ((.5 - (e.clientY - r.top) / r.height) * 8).toFixed(2) + "deg)" });
+        hp.addEventListener("pointerleave", function () { hp.style.transform = "" });
     }
-    var seen = false; try { seen = sessionStorage.getItem("fran-intro") } catch (e) { }
-    var lid = document.getElementById("lid"), L = lid.getTotalLength();
-    var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    if (!seen) {
-        gsap.set(lid, { strokeDasharray: L, strokeDashoffset: L });
-        gsap.set(".lash", { scaleY: 0 });
-        gsap.set(".iris,.pupil", { opacity: 0, scale: .6, transformOrigin: "50% 50%" });
-        tl.to(lid, { strokeDashoffset: 0, duration: .9, ease: "power2.inOut" })
-            .to(".iris,.pupil", { opacity: 1, scale: 1, duration: .6 }, "-=.3")
-            .to(".lash", { scaleY: 1, duration: .5, stagger: .015 }, "-=.5")
-            .from("h1 .ln span", { yPercent: 110, duration: .9, stagger: .08 }, "-=.7")
-            .from("[data-in],header", { opacity: 0, y: 14, duration: .6, stagger: .08 }, "-=.4");
-        try { sessionStorage.setItem("fran-intro", "1") } catch (e) { }
-    } else {
-        tl.from("h1 .ln span", { yPercent: 110, duration: .7, stagger: .06 }).from("[data-in]", { opacity: 0, y: 10, duration: .5, stagger: .06 }, "-=.4");
+
+    // Galeria: contador, setas e arrastar com o mouse
+    var rail = document.querySelector(".rail"), figs = rail.children, gc = $("gc"), step = function () { return figs[0].offsetWidth + 14 };
+    function upd() { gc.textContent = ("0" + (Math.min(figs.length - 1, Math.round(rail.scrollLeft / step())) + 1)).slice(-2) + " / 0" + figs.length }
+    rail.addEventListener("scroll", upd, { passive: true });
+    $("gp").onclick = function () { rail.scrollBy({ left: -step(), behavior: "smooth" }) };
+    $("gn").onclick = function () { rail.scrollBy({ left: step(), behavior: "smooth" }) };
+    rail.addEventListener("keydown", function (e) { if (e.key === "ArrowRight") $("gn").click(); if (e.key === "ArrowLeft") $("gp").click() });
+    var down = false, sx = 0, sl = 0;
+    rail.addEventListener("pointerdown", function (e) { if (e.pointerType !== "mouse") return; down = true; sx = e.clientX; sl = rail.scrollLeft; rail.classList.add("drag"); rail.style.scrollSnapType = "none" });
+    addEventListener("pointermove", function (e) { if (down) rail.scrollLeft = sl - (e.clientX - sx) });
+    addEventListener("pointerup", function () { if (!down) return; down = false; rail.classList.remove("drag"); rail.style.scrollSnapType = "" });
+
+    // Antes e depois (cortina)
+    var cmp = $("cmp"); $("rng").addEventListener("input", function (e) { cmp.style.setProperty("--p", e.target.value + "%") });
+
+    // Briefing que monta a mensagem do WhatsApp
+    var G = [["Procedimento", SERVICES.map(function (x) { return x[0] })], ["Ocasião", ["Dia a dia", "Noiva", "Festa", "Evento"]], ["Efeito", ["Natural", "Marcante", "Glam"]]], br = $("brief"), html = "";
+    G.forEach(function (g, i) {
+        html += '<fieldset><legend>' + g[0] + '</legend><div class="chips">' + g[1].map(function (v) { return '<label><input type="radio" name="g' + i + '" value="' + v + '"><span>' + v + '</span></label>' }).join("") + '</div></fieldset>';
+    });
+    br.innerHTML = html + '<label class="nm">Seu nome<input id="bn" autocomplete="given-name"></label>';
+    function msg() {
+        var v = function (i) { var c = br.querySelector('input[name="g' + i + '"]:checked'); return c ? c.value : "" }, n = $("bn").value.trim();
+        var m = "Olá, Fran!" + (n ? " Me chamo " + n + "." : "") + " Quero agendar" + (v(0) ? ": " + v(0) : " um horário") + ".";
+        if (v(1)) m += " Ocasião: " + v(1) + "."; if (v(2)) m += " Efeito desejado: " + v(2) + ".";
+        $("bgo").href = wa(m);
     }
-    // Cílios "respiram" com o scroll no hero
-    gsap.to(".eye", { scaleY: .82, transformOrigin: "50% 100%", ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: .6 } });
-    gsap.to(".lash", { scaleY: 1.25, stagger: { each: .01, from: "center" }, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: .6 } });
-    // Cards de serviço
-    gsap.from(".card", { opacity: 0, y: 28, duration: .7, stagger: .08, ease: "power3.out", scrollTrigger: { trigger: "#svc", start: "top 82%" } });
-    // Foto do Sobre: parallax leve
-    gsap.fromTo("#par", { yPercent: -6 }, { yPercent: 6, ease: "none", scrollTrigger: { trigger: ".about", start: "top bottom", end: "bottom top", scrub: true } });
-    // Contagem do selo
-    var o = { v: 0 }, c = document.getElementById("cnt");
-    ScrollTrigger.create({ trigger: ".about", start: "top 70%", once: true, onEnter: function () { gsap.to(o, { v: 4, duration: 1.2, ease: "power2.out", onUpdate: function () { c.textContent = Math.round(o.v) } }) } });
-    // Depoimentos
-    gsap.from(".testi blockquote", { opacity: 0, y: 24, duration: .7, stagger: .1, ease: "power3.out", scrollTrigger: { trigger: ".testi", start: "top 85%" } });
-    // Cursor e botão magnético (apenas mouse)
-    if (matchMedia("(pointer:fine)").matches) {
-        var cur = document.getElementById("cur"), cx = gsap.quickTo(cur, "x", { duration: .25 }), cy = gsap.quickTo(cur, "y", { duration: .25 });
+    br.addEventListener("input", msg); msg();
+
+    // Cursor personalizado e botões magnéticos (apenas mouse)
+    if (window.gsap && fine && !reduce) {
+        var cur = $("cur"), cx = gsap.quickTo(cur, "x", { duration: .25 }), cy = gsap.quickTo(cur, "y", { duration: .25 });
         addEventListener("mousemove", function (e) { cur.style.opacity = 1; cx(e.clientX); cy(e.clientY) });
         document.querySelectorAll("a,button").forEach(function (el) {
             el.addEventListener("mouseenter", function () { gsap.to(cur, { scale: 1.6, duration: .25 }) });
@@ -76,4 +97,4 @@ if (window.gsap && window.ScrollTrigger && !reduce) {
             b.addEventListener("mouseleave", function () { mx(0); my(0) });
         });
     }
-}
+})();

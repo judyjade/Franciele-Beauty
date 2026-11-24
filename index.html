@@ -13,7 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -43,17 +43,11 @@
                 <span class="chip" data-in>Foz do Iguaçu • PR</span>
                 <h1><span class="ln"><span>Realce sua</span></span><span class="ln"><span>beleza com</span></span><span
                         class="ln"><span>cílios incríveis</span></span></h1>
-                <svg class="eye" viewBox="0 0 600 220" aria-hidden="true" focusable="false">
-                    <circle class="iris" cx="300" cy="150" r="46" />
-                    <circle class="pupil" cx="300" cy="150" r="18" />
-                    <path class="lid" id="lid" d="M30 170 Q300 20 570 170" />
-                    <path class="lid" d="M30 170 Q300 270 570 170" opacity=".35" />
-                    <g id="lashes"></g>
-                </svg>
                 <p data-in>Um atendimento personalizado para valorizar seu olhar, elevar sua autoestima e revelar ainda
                     mais a beleza que já existe em você.</p>
                 <a class="btn wa mag" data-in data-msg="Olá, Fran! Quero agendar um horário." href="#" target="_blank"
                     rel="noopener" style="width:max-content">Agendar horário</a>
+                <div class="hero-ph" id="hph"><span>Espaço para a foto da Fran</span></div>
             </div>
         </section>
 
@@ -117,6 +111,22 @@
                 <figure>Foto do trabalho 3</figure>
                 <figure>Foto do trabalho 4</figure>
                 <figure>Foto do trabalho 5</figure>
+            </div>
+            <div class="ctl"><span id="gc" aria-live="polite">01 / 05</span><button id="gp" type="button" aria-label="Foto anterior">←</button><button id="gn" type="button" aria-label="Próxima foto">→</button></div>
+        </section>
+
+        <section class="ba" id="antes-depois">
+            <div class="wrap">
+                <div class="sec-h"><span class="label">Antes e depois</span>
+                    <h2>Arraste e veja a diferença</h2>
+                    <p>Deslize para revelar o resultado final.</p>
+                </div>
+                <div class="cmp" id="cmp">
+                    <div class="side b" id="cb"><span>Antes</span></div>
+                    <div class="side a" id="ca"><span>Depois</span></div>
+                    <i class="knob" aria-hidden="true"></i>
+                    <input type="range" min="0" max="100" value="50" id="rng" aria-label="Comparar antes e depois">
+                </div>
             </div>
         </section>
 
@@ -183,10 +193,9 @@
                 </div>
                 <div class="box">
                     <h3>Pronta para realçar seu olhar?</h3>
-                    <p>Clique no botão e envie uma mensagem. Respondo com os horários disponíveis e todas as orientações
-                        para o seu procedimento.</p>
-                    <a class="btn wa" data-msg="Olá, Fran! Vim pelo site e gostaria de mais informações." href="#"
-                        target="_blank" rel="noopener">Chamar no WhatsApp</a>
+                    <p>Monte sua mensagem em poucos toques e eu respondo com os horários disponíveis.</p>
+                    <div class="brief" id="brief"></div>
+                    <a class="btn" id="bgo" href="#" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>
                 </div>
             </div>
         </section>
@@ -225,8 +234,6 @@
     <div class="cur" id="cur" aria-hidden="true"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="script.js"></script>
 </body>
 
