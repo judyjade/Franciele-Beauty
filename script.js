@@ -1,6 +1,6 @@
-// Número da Fran (somente dígitos com DDI, ex.: 5545999999999). Vazio = o WhatsApp pede para escolher o contato.
-var WA_NUMBER = "";
-// Coloque as fotos na pasta /img com estes nomes (ou ajuste os caminhos). Sem o arquivo, o placeholder continua aparecendo.
+
+var WA_NUMBER = "554584311691";
+
 var IMG = {
     hero: "img/fran-hero.jpg",
     fran: "img/fran.jpg",
